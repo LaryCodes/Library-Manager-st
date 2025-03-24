@@ -1,0 +1,10 @@
+[
+    {
+        "title": "Python",
+        "author": "hhe",
+        "year": "234",
+        "genre": "Other",
+        "read": true,
+        "rating": 3
+    }
+]
