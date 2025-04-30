@@ -6,7 +6,6 @@ import pandas as pd
 
 LIBRARY_FILE = "library.txt"
 
-# Function to load books from file
 def load_books():
     try:
         with open(LIBRARY_FILE, "r") as file:
@@ -15,12 +14,10 @@ def load_books():
     except (FileNotFoundError, json.JSONDecodeError):
         return []
 
-# Function to save books to file
 def save_books(books):
     with open(LIBRARY_FILE, "w") as file:
         json.dump(books, file, indent=4)
 
-# Set page config
 st.set_page_config(
     page_title="Personal Library Manager",
     page_icon="📚",
@@ -28,7 +25,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
 st.markdown("""
 <style>
     .main-header {
@@ -121,13 +117,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Load books when the app starts
 books = load_books()
 
-# Custom header
 st.markdown('<div class="main-header">📚 Personal Library Manager</div>', unsafe_allow_html=True)
 
-# Horizontal menu instead of sidebar
 with st.container():
     selected = option_menu(
         menu_title=None,
@@ -144,7 +137,6 @@ with st.container():
         }
     )
 
-# Add a book
 if selected == "Add Book":
     st.markdown('<div class="sub-header">➕ Add a New Book</div>', unsafe_allow_html=True)
     
@@ -177,11 +169,9 @@ if selected == "Add Book":
         else:
             st.error("Title and author are required!")
 
-# View all books
 elif selected == "View All Books":
     st.markdown('<div class="sub-header">📖 Your Book Collection</div>', unsafe_allow_html=True)
     
-    # Filter options
     col1, col2, col3 = st.columns(3)
     with col1:
         filter_status = st.radio("Filter by status:", ["All", "Read", "Unread"])
@@ -195,7 +185,6 @@ elif selected == "View All Books":
     with col3:
         sort_by = st.selectbox("Sort by:", ["Title", "Author", "Year", "Genre"])
     
-    # Apply filters
     filtered_books = books.copy()
     if filter_status == "Read":
         filtered_books = [book for book in filtered_books if book["read"]]
@@ -205,11 +194,9 @@ elif selected == "View All Books":
     if filter_genre != "All Genres":
         filtered_books = [book for book in filtered_books if book["genre"] == filter_genre]
     
-    # Sort books
     sort_key = sort_by.lower()
     filtered_books = sorted(filtered_books, key=lambda x: x[sort_key] if sort_key in x else "")
     
-    # Display books
     if filtered_books:
         for book in filtered_books:
             status_badge = '<span class="read-badge">READ</span>' if book["read"] else '<span class="unread-badge">UNREAD</span>'
@@ -227,7 +214,6 @@ elif selected == "View All Books":
     else:
         st.info("No books match your criteria or your library is empty.")
 
-# Search for a book
 elif selected == "Search Book":
     st.markdown('<div class="sub-header">🔍 Find Books</div>', unsafe_allow_html=True)
     
@@ -257,15 +243,13 @@ elif selected == "Search Book":
         else:
             st.warning(f"No books found matching '{keyword}' in {search_type}.")
 
-# Remove a book
 elif selected == "Remove Book":
     st.markdown('<div class="sub-header">🗑 Remove Books</div>', unsafe_allow_html=True)
     
     if books:
         titles = [book["title"] for book in books]
         book_to_remove = st.selectbox("Select a book to remove:", titles)
-        
-        # Show book details
+
         selected_book = next((book for book in books if book["title"] == book_to_remove), None)
         if selected_book:
             status_badge = '<span class="read-badge">READ</span>' if selected_book["read"] else '<span class="unread-badge">UNREAD</span>'
@@ -288,18 +272,15 @@ elif selected == "Remove Book":
     else:
         st.info("No books in the library to remove.")
 
-# Statistics
 elif selected == "Statistics":
     st.markdown('<div class="sub-header">📊 Library Statistics</div>', unsafe_allow_html=True)
     
     if books:
-        # Basic stats
         total_books = len(books)
         read_books = sum(1 for book in books if book["read"])
         unread_books = total_books - read_books
         percentage_read = (read_books / total_books) * 100 if total_books > 0 else 0
-        
-        # Create three columns
+
         col1, col2, col3 = st.columns(3)
         
         with col1:
@@ -326,14 +307,12 @@ elif selected == "Statistics":
             </div>
             """.format(percentage_read), unsafe_allow_html=True)
         
-        # Genre distribution
         st.markdown("### 📚 Genre Distribution")
         genre_counts = {}
         for book in books:
             genre = book.get("genre", "Unknown")
             genre_counts[genre] = genre_counts.get(genre, 0) + 1
         
-        # Create DataFrame for plotting
         genre_df = pd.DataFrame({"Genre": list(genre_counts.keys()), "Count": list(genre_counts.values())})
         
         fig = px.pie(genre_df, values="Count", names="Genre", title="Books by Genre",
@@ -342,11 +321,9 @@ elif selected == "Statistics":
         fig.update_layout(uniformtext_minsize=12, uniformtext_mode='hide')
         st.plotly_chart(fig, use_container_width=True)
         
-        # Reading progress over time
         if any(book.get("read") for book in books):
             st.markdown("### 📈 Reading Progress")
             
-            # Create a bar chart for read vs unread by genre
             read_by_genre = {}
             unread_by_genre = {}
             
